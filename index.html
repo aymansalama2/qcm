@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Quiz - Tokyo Cyberpunk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(45deg, #1a1a1a, #333);
+            min-height: 100vh;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px #fff, 0 0 10px #ff004d, 0 0 15px #ff004d, 0 0 20px #ff004d;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, #ff004d, #ff1a75);
+            border: 2px solid #ff1a75;
+            box-shadow: 0 0 10px #ff004d;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-button:hover {
+            background: linear-gradient(45deg, #ff1a75, #ff004d);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px #ff004d;
+        }
+
+        .cyber-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff004d;
+            box-shadow: 0 0 20px rgba(255, 0, 77, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #ff004d, #ff1a75);
+            box-shadow: 0 0 10px #ff004d;
+        }
+
+        @keyframes neon {
+            from {
+                text-shadow: 0 0 5px #fff, 0 0 10px #ff004d, 0 0 15px #ff004d, 0 0 20px #ff004d;
+            }
+            to {
+                text-shadow: 0 0 2px #fff, 0 0 5px #ff004d, 0 0 10px #ff004d, 0 0 15px #ff004d;
+            }
+        }
+
+        .cyber-grid {
+            background-image: linear-gradient(rgba(255, 0, 77, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255, 0, 77, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            animation: grid-animation 20s linear infinite;
+        }
+
+        @keyframes grid-animation {
+            0% {
+                transform: translateZ(0) rotate3d(1, 0, 0, 0deg);
+            }
+            100% {
+                transform: translateZ(100px) rotate3d(1, 0, 0, 20deg);
+            }
+        }
+
+        .choice-hover:hover {
+            background: rgba(255, 0, 77, 0.1);
+            border-left: 4px solid #ff004d;
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="cyber-grid"></div>
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-8 neon-text">JavaScript Quiz</h1>
+        
+        <div class="flex justify-center space-x-4 mb-8">
+            <button id="part1Btn" class="cyber-button px-6 py-2 rounded-lg">Part 1</button>
+            <button id="part2Btn" class="cyber-button px-6 py-2 rounded-lg">Part 2</button>
+            <button id="part3Btn" class="cyber-button px-6 py-2 rounded-lg">Part 3</button>
+        </div>
+
+        <div class="cyber-container rounded-lg p-6 mb-4">
+            <div class="mb-4">
+                <div class="h-2 bg-gray-800 rounded-full">
+                    <div id="progressBar" class="progress-bar h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between mt-2">
+                    <span id="questionCounter" class="text-sm">Question 1/20</span>
+                    <span id="score" class="text-sm">Score: 0/0</span>
+                </div>
+            </div>
+
+            <div id="questionContainer" class="mb-6">
+                <h2 id="questionText" class="text-xl mb-4 neon-text"></h2>
+                <div id="choices" class="space-y-3"></div>
+            </div>
+
+            <div class="flex justify-between">
+                <button id="prevBtn" class="cyber-button px-4 py-2 rounded-lg">Précédent</button>
+                <button id="validateBtn" class="cyber-button px-4 py-2 rounded-lg">Valider</button>
+                <button id="nextBtn" class="cyber-button px-4 py-2 rounded-lg">Suivant</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="cyber-container p-8 rounded-lg max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4 neon-text">Résultats</h2>
+            <div id="finalScore" class="mb-6"></div>
+            <button id="restartBtn" class="cyber-button w-full py-2 rounded-lg">Recommencer</button>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
