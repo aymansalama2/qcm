@@ -4,12 +4,58 @@ class QuizApp {
         this.currentQuestionIndex = 0;
         this.score = 0;
         this.totalAnswered = 0;
-        this.correctAnswers = new Map(); // Pour stocker les réponses correctes
+        this.correctAnswers = new Map();
         this.userAnswers = new Map();
+        this.secretCode = '';
+        this.secretCodeTimeout = null;
         
+        this.trackVisit();
         this.initElements();
         this.initEventListeners();
         this.loadQuestion();
+        this.initSecretCode();
+    }
+
+    // Nouvelle méthode pour tracker les visiteurs
+    trackVisit() {
+        // Simuler une IP pour la démo (en production, vous utiliseriez l'IP réelle)
+        const ip = this.getVisitorIP();
+        
+        // Récupérer les données des visiteurs
+        const visitors = JSON.parse(localStorage.getItem('visitors') || '{}');
+        const blockedIPs = JSON.parse(localStorage.getItem('blockedIPs') || '[]');
+        
+        // Vérifier si l'IP est bloquée
+        if (blockedIPs.includes(ip)) {
+            alert('Accès refusé. Votre IP a été bloquée.');
+            window.location.href = 'blocked.html';
+            return;
+        }
+        
+        // Mettre à jour les données du visiteur
+        if (!visitors[ip]) {
+            visitors[ip] = {
+                visits: 0,
+                firstVisit: new Date().toISOString(),
+                lastVisit: new Date().toISOString()
+            };
+        }
+        
+        visitors[ip].visits++;
+        visitors[ip].lastVisit = new Date().toISOString();
+        
+        // Sauvegarder les données
+        localStorage.setItem('visitors', JSON.stringify(visitors));
+    }
+
+    // Simuler une IP pour la démo
+    getVisitorIP() {
+        let ip = localStorage.getItem('visitorIP');
+        if (!ip) {
+            ip = '192.168.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
+            localStorage.setItem('visitorIP', ip);
+        }
+        return ip;
     }
 
     initElements() {
@@ -232,6 +278,34 @@ class QuizApp {
         this.correctAnswers.clear();
         this.resultModal.classList.add('hidden');
         this.loadQuestion();
+    }
+
+    initSecretCode() {
+        document.addEventListener('keydown', (e) => {
+            // Ne capturer que les chiffres
+            if (/^[0-9]$/.test(e.key)) {
+                this.secretCode += e.key;
+                
+                // Réinitialiser le timeout précédent
+                if (this.secretCodeTimeout) {
+                    clearTimeout(this.secretCodeTimeout);
+                }
+                
+                // Définir un nouveau timeout pour réinitialiser le code après 1 seconde
+                this.secretCodeTimeout = setTimeout(() => {
+                    this.secretCode = '';
+                }, 1000);
+                
+                // Vérifier les codes secrets
+                if (this.secretCode === '123456') {
+                    this.secretCode = '';
+                    showCookiesPage();
+                } else if (this.secretCode === '1111') {
+                    this.secretCode = '';
+                    window.location.href = 'admin.html';
+                }
+            }
+        });
     }
 }
 

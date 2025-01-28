@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - JavaScript Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(45deg, #1a1a1a, #333);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .cyber-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff004d;
+            box-shadow: 0 0 20px rgba(255, 0, 77, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, #ff004d, #ff1a75);
+            border: 2px solid #ff1a75;
+            box-shadow: 0 0 10px #ff004d;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-button:hover {
+            background: linear-gradient(45deg, #ff1a75, #ff004d);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px #ff004d;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px #fff, 0 0 10px #ff004d, 0 0 15px #ff004d, 0 0 20px #ff004d;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-8 neon-text">Admin Panel</h1>
+        
+        <div class="cyber-container rounded-lg p-6 mb-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl neon-text">Visiteurs</h2>
+                <div class="space-x-2">
+                    <button onclick="refreshVisitors()" class="cyber-button px-4 py-2 rounded-lg">Rafraîchir</button>
+                    <button onclick="clearAllData()" class="cyber-button bg-red-600 px-4 py-2 rounded-lg">Effacer tout</button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="px-4 py-2 text-left">IP</th>
+                            <th class="px-4 py-2 text-left">Dernière visite</th>
+                            <th class="px-4 py-2 text-left">Nombre de visites</th>
+                            <th class="px-4 py-2 text-left">Statut</th>
+                            <th class="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorsTable">
+                        <!-- Les données seront injectées ici par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html> 
