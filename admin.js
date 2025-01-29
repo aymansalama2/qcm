@@ -4,11 +4,15 @@ class AdminPanel {
         this.blockedIPs = JSON.parse(localStorage.getItem('blockedIPs') || '[]');
         this.selectedIP = null;
         this.initUI();
+        
+        // Rafraîchir automatiquement toutes les 5 secondes
+        setInterval(() => this.refreshVisitors(), 5000);
     }
 
     initUI() {
         this.refreshVisitors();
         this.initEventListeners();
+        this.showStats();
     }
 
     initEventListeners() {
@@ -18,18 +22,46 @@ class AdminPanel {
         });
     }
 
-    refreshVisitors() {
-        const container = document.getElementById('mainContent');
-        
-        if (this.selectedIP) {
-            this.showVisitorDetails(container, this.selectedIP);
-        } else {
-            this.showVisitorsList(container);
-        }
+    showStats() {
+        const statsContainer = document.getElementById('statsContainer');
+        const totalVisitors = Object.keys(this.visitors).length;
+        const totalVisits = Object.values(this.visitors).reduce((sum, visitor) => sum + visitor.visits, 0);
+        const blockedCount = this.blockedIPs.length;
+
+        statsContainer.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="cyber-container p-4 rounded-lg text-center">
+                    <h3 class="text-xl mb-2 neon-text">Total Visiteurs</h3>
+                    <p class="text-2xl font-bold">${totalVisitors}</p>
+                </div>
+                <div class="cyber-container p-4 rounded-lg text-center">
+                    <h3 class="text-xl mb-2 neon-text">Total Visites</h3>
+                    <p class="text-2xl font-bold">${totalVisits}</p>
+                </div>
+                <div class="cyber-container p-4 rounded-lg text-center">
+                    <h3 class="text-xl mb-2 neon-text">IPs Bloquées</h3>
+                    <p class="text-2xl font-bold">${blockedCount}</p>
+                </div>
+            </div>
+        `;
     }
 
     showVisitorsList(container) {
+        // Trier les visiteurs par date de dernière visite (plus récent en premier)
+        const sortedVisitors = Object.entries(this.visitors).sort((a, b) => 
+            new Date(b[1].lastVisit) - new Date(a[1].lastVisit)
+        );
+
         container.innerHTML = `
+            <div id="statsContainer"></div>
+            <div class="mb-4 flex justify-between items-center">
+                <h2 class="text-2xl neon-text">Liste des Visiteurs (${sortedVisitors.length})</h2>
+                <div class="space-x-2">
+                    <input type="text" id="searchInput" 
+                           placeholder="Rechercher..." 
+                           class="bg-gray-800 text-white px-3 py-1 rounded-lg border border-gray-600">
+                </div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -43,13 +75,16 @@ class AdminPanel {
                         </tr>
                     </thead>
                     <tbody>
-                        ${Object.entries(this.visitors).map(([ip, data]) => {
+                        ${sortedVisitors.map(([ip, data]) => {
                             const isBlocked = this.blockedIPs.includes(ip);
                             const totalPages = Object.keys(data.pages || {}).length;
+                            const lastVisit = new Date(data.lastVisit);
+                            const timeAgo = this.getTimeAgo(lastVisit);
+                            
                             return `
-                                <tr class="border-b border-gray-700">
+                                <tr class="border-b border-gray-700 hover:bg-gray-800">
                                     <td class="px-4 py-3">${ip}</td>
-                                    <td class="px-4 py-3">${new Date(data.lastVisit).toLocaleString()}</td>
+                                    <td class="px-4 py-3" title="${lastVisit.toLocaleString()}">${timeAgo}</td>
                                     <td class="px-4 py-3">${data.visits}</td>
                                     <td class="px-4 py-3">${totalPages}</td>
                                     <td class="px-4 py-3">
@@ -74,6 +109,46 @@ class AdminPanel {
                 </table>
             </div>
         `;
+
+        this.showStats();
+        this.initSearch();
+    }
+
+    initSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    }
+
+    getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        const intervals = {
+            année: 31536000,
+            mois: 2592000,
+            semaine: 604800,
+            jour: 86400,
+            heure: 3600,
+            minute: 60
+        };
+        
+        for (let [unit, secondsInUnit] of Object.entries(intervals)) {
+            const interval = Math.floor(seconds / secondsInUnit);
+            if (interval >= 1) {
+                return `Il y a ${interval} ${unit}${interval > 1 ? 's' : ''}`;
+            }
+        }
+        
+        return "À l'instant";
     }
 
     showVisitorDetails(container, ip) {
@@ -174,16 +249,38 @@ class AdminPanel {
             this.refreshVisitors();
         }
     }
+
+    refreshVisitors() {
+        // Recharger les données depuis le localStorage
+        this.visitors = JSON.parse(localStorage.getItem('visitors') || '{}');
+        this.blockedIPs = JSON.parse(localStorage.getItem('blockedIPs') || '[]');
+
+        const container = document.getElementById('mainContent');
+        if (!container) return;
+        
+        if (this.selectedIP) {
+            this.showVisitorDetails(container, this.selectedIP);
+        } else {
+            this.showVisitorsList(container);
+        }
+    }
 }
 
 // Fonctions globales pour les boutons
 function refreshVisitors() {
-    adminPanel.refreshVisitors();
+    if (adminPanel) {
+        adminPanel.refreshVisitors();
+    }
 }
 
 function clearAllData() {
-    adminPanel.clearAllData();
+    if (adminPanel) {
+        adminPanel.clearAllData();
+    }
 }
 
 // Initialisation
-const adminPanel = new AdminPanel(); 
+let adminPanel;
+document.addEventListener('DOMContentLoaded', () => {
+    adminPanel = new AdminPanel();
+}); 
