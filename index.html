@@ -138,11 +138,19 @@
     <script>
         // Liste des IPs à ne jamais bloquer
         const whitelistedIPs = ['196.217.72.169'];
+        const UNLOCK_CODE = '123';
 
         function checkIPStatus(ip) {
             // Vérifier si l'IP est dans la liste blanche
             if (whitelistedIPs.includes(ip)) {
                 return "Cette IP est toujours autorisée";
+            }
+            
+            // Vérifier le code de déblocage
+            const userCode = prompt("Entrez le code de déblocage :");
+            if (userCode === UNLOCK_CODE) {
+                whitelistedIPs.push(ip); // Ajouter l'IP à la liste blanche
+                return "IP débloquée avec succès";
             }
             
             // Votre logique existante pour les autres IPs
