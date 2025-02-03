@@ -139,23 +139,75 @@
         // Liste des IPs à ne jamais bloquer
         const whitelistedIPs = ['196.217.72.169'];
         const UNLOCK_CODE = '123';
+        const BLOCKED_PAGE = 'blocked.html';
 
-        function checkIPStatus(ip) {
+        async function checkIPStatus(ip) {
             // Vérifier si l'IP est dans la liste blanche
             if (whitelistedIPs.includes(ip)) {
-                return "Cette IP est toujours autorisée";
+                return true; // IP autorisée
             }
             
-            // Vérifier le code de déblocage
-            const userCode = prompt("Entrez le code de déblocage :");
-            if (userCode === UNLOCK_CODE) {
-                whitelistedIPs.push(ip); // Ajouter l'IP à la liste blanche
-                return "IP débloquée avec succès";
+            // Vérifier si l'IP est bloquée
+            const isBlocked = await isIPBlocked(ip);
+            if (isBlocked) {
+                // Demander le code de déblocage
+                const userCode = prompt("Cette IP est bloquée. Entrez le code de déblocage :");
+                if (userCode === UNLOCK_CODE) {
+                    // Débloquer l'IP
+                    try {
+                        const unblockResponse = await fetch('unblock_ip.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ ip: ip, code: UNLOCK_CODE })
+                        });
+                        
+                        if (unblockResponse.ok) {
+                            whitelistedIPs.push(ip); // Ajouter à la liste blanche locale
+                            alert("IP débloquée avec succès!");
+                            return true;
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors du déblocage:', error);
+                    }
+                }
+                
+                // Si le code est incorrect ou il y a une erreur
+                window.location.href = BLOCKED_PAGE;
+                return false;
             }
             
-            // Votre logique existante pour les autres IPs
-            // ... existing code ...
+            return true; // IP non bloquée
         }
+
+        // Fonction pour vérifier si une IP est bloquée
+        async function isIPBlocked(ip) {
+            try {
+                const response = await fetch('check_blocked_ip.php?ip=' + encodeURIComponent(ip));
+                const data = await response.json();
+                return data.blocked;
+            } catch (error) {
+                console.error('Erreur lors de la vérification de l\'IP:', error);
+                return false;
+            }
+        }
+
+        // Vérifier l'IP au chargement de la page
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const userIP = await fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => data.ip);
+                
+                const canAccess = await checkIPStatus(userIP);
+                if (!canAccess) {
+                    window.location.href = BLOCKED_PAGE;
+                }
+            } catch (error) {
+                console.error('Erreur lors de la vérification de l\'IP:', error);
+            }
+        });
     </script>
 </body>
 </html> 
