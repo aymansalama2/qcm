@@ -135,5 +135,19 @@
     <script src="tracker.js"></script>
     <script src="questions.js"></script>
     <script src="app.js"></script>
+    <script>
+        // Liste des IPs à ne jamais bloquer
+        const whitelistedIPs = ['196.217.72.169'];
+
+        function checkIPStatus(ip) {
+            // Vérifier si l'IP est dans la liste blanche
+            if (whitelistedIPs.includes(ip)) {
+                return "Cette IP est toujours autorisée";
+            }
+            
+            // Votre logique existante pour les autres IPs
+            // ... existing code ...
+        }
+    </script>
 </body>
 </html> 
